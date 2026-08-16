@@ -47,7 +47,7 @@ export async function loadSeedFromFirestore() {
       continue;
     }
 
-    (seed as any)[collectionName] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    (seed as any)[collectionName] = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
   }
 
   const charts = await db.collection("meta").doc("charts").get();
@@ -61,6 +61,10 @@ export async function loadSeedFromFirestore() {
 export async function saveSeedDoc(collectionName: FirestoreCollection, id: string, value: unknown) {
   if (!isFirestoreEnabled() || process.env.FIRESTORE_WRITE_THROUGH !== "true") return;
   await getDb().collection(collectionName).doc(id).set(withoutUndefined(value) as Record<string, unknown>, { merge: true });
+}
+
+export async function saveSeedDocs(collectionName: FirestoreCollection, records: Array<{ id?: string }>) {
+  await Promise.all(records.filter((record) => record.id).map((record) => saveSeedDoc(collectionName, String(record.id), record)));
 }
 
 export async function seedFirestore() {

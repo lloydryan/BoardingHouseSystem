@@ -1,6 +1,8 @@
-import { Bell, Building2, ChevronLeft, Command, FileBarChart, Gauge, LayoutDashboard, LogOut, Moon, Plus, Search, Settings, Shield, Sparkles, Sun, Users } from "lucide-react";
+import { Bell, Building2, ChevronLeft, FileBarChart, Gauge, LayoutDashboard, LogOut, Moon, Plus, Search, Settings, Shield, Sparkles, Sun, Users } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { clearSession, getStoredUser } from "../lib/auth";
+import { toast } from "../lib/toast";
 
 const landlordNav = [
   ["Dashboard", "/landlord/dashboard", LayoutDashboard],
@@ -20,6 +22,28 @@ const adminNav = [
 
 export function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const user = getStoredUser();
+  const landlord = JSON.parse(localStorage.getItem("bh_landlord") ?? "null");
+  const isAdmin = user?.role === "SUPER_ADMIN";
+  const nav = isAdmin ? adminNav : landlordNav;
+  const workspaceLabel = isAdmin ? "Platform Administration" : "Landlord Workspace";
+  const businessLabel = isAdmin ? "Super Admin" : landlord?.businessName ?? "Landlord";
+  const initials = user?.fullName
+    ?.split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() ?? "BH";
+
+  function logout() {
+    clearSession();
+    navigate("/login", { replace: true });
+  }
+
+  function goQuickAdd() {
+    navigate(isAdmin ? "/admin/landlords" : "/landlord/properties");
+  }
 
   return (
     <div className="app-shell">
@@ -29,10 +53,10 @@ export function AppLayout() {
             <div className="brand-mark">BH</div>
             <div>
               <strong>BoardHaus</strong>
-              <span>Rivera Homes</span>
+              <span>{businessLabel}</span>
             </div>
           </div>
-          <button className="collapse-btn" title="Collapse sidebar"><ChevronLeft size={16} /></button>
+          <button className="collapse-btn" title="Collapse sidebar" onClick={() => toast("Sidebar collapse is coming next.", "info")}><ChevronLeft size={16} /></button>
         </div>
         <div className="sidebar-command">
           <Search size={15} />
@@ -40,15 +64,8 @@ export function AppLayout() {
           <kbd>Ctrl K</kbd>
         </div>
         <nav>
-          <p>Landlord Workspace</p>
-          {landlordNav.map(([label, to, Icon]) => (
-            <NavLink key={to} to={to} className={({ isActive }) => (isActive ? "active" : "")}>
-              <Icon size={18} />
-              {label}
-            </NavLink>
-          ))}
-          <p>Super Admin</p>
-          {adminNav.map(([label, to, Icon]) => (
+          <p>{workspaceLabel}</p>
+          {nav.map(([label, to, Icon]) => (
             <NavLink key={to} to={to} className={({ isActive }) => (isActive ? "active" : "")}>
               <Icon size={18} />
               {label}
@@ -56,18 +73,18 @@ export function AppLayout() {
           ))}
         </nav>
         <div className="sidebar-profile">
-          <div className="avatar">MR</div>
+          <div className="avatar">{initials}</div>
           <div>
-            <strong>Mara Rivera</strong>
-            <span>Growth plan</span>
+            <strong>{user?.fullName ?? "Guest"}</strong>
+            <span>{isAdmin ? "Platform access" : "Landlord access"}</span>
           </div>
         </div>
       </aside>
       <main>
         <header className="topbar">
           <div>
-            <span className="crumb">Workspace / Rivera Homes</span>
-            <h1>Boarding House Monitoring</h1>
+            <span className="crumb">{workspaceLabel} / {businessLabel}</span>
+            <h1>{isAdmin ? "Platform Control Center" : "Boarding House Monitoring"}</h1>
           </div>
           <label className="global-search">
             <Search size={16} />
@@ -75,11 +92,11 @@ export function AppLayout() {
             <kbd>Ctrl K</kbd>
           </label>
           <div className="top-actions">
-            <button className="quick-add" title="Quick add"><Plus size={18} /><span>New</span></button>
-            <button title="Theme"><Sun size={16} /><Moon size={16} /></button>
-            <button title="Notifications"><Bell size={18} /></button>
-            <button title="Product updates"><Sparkles size={18} /></button>
-            <button title="Logout"><LogOut size={18} /></button>
+            <button className="quick-add" title="Quick add" onClick={goQuickAdd}><Plus size={18} /><span>New</span></button>
+            <button title="Theme" onClick={() => navigate(isAdmin ? "/admin/settings" : "/landlord/theme")}><Sun size={16} /><Moon size={16} /></button>
+            <button title="Notifications" onClick={() => navigate(isAdmin ? "/admin/audit-logs" : "/landlord/notifications")}><Bell size={18} /></button>
+            <button title="Product updates" onClick={() => toast("BoardHaus is up to date.", "success")}><Sparkles size={18} /></button>
+            <button title="Logout" onClick={logout}><LogOut size={18} /></button>
           </div>
         </header>
         <AnimatePresence mode="wait">

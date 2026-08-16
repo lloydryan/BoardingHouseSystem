@@ -6,7 +6,7 @@ import { BuildingLegend } from "../../components/building/BuildingLegend";
 import { BuildingTemplateSelector } from "../../components/building/BuildingTemplateSelector";
 import { BuildingFloor, BuildingUnit } from "../../components/building/types";
 import { StatusBadge } from "../../components/ui";
-import { api, apiPost, money } from "../../lib/api";
+import { api, apiPatch, apiPost, money } from "../../lib/api";
 
 type BuildingData = {
   property: any;
@@ -70,7 +70,7 @@ export function PropertyBuildingPage() {
           <button onClick={() => setDialog("floor")}><Layers size={16} /> Add Floor</button>
           <button className="primary-btn" onClick={() => setDialog("unit")}><Plus size={16} /> Add Unit</button>
           <button onClick={() => setDialog("edit")}><Pencil size={16} /> Edit Property</button>
-          <button onClick={() => setDialog("report")}><FileBarChart size={16} /> View Report</button>
+          <button onClick={() => navigate("/landlord/reports")}><FileBarChart size={16} /> View Report</button>
         </div>
       </header>
 
@@ -109,10 +109,7 @@ export function PropertyBuildingPage() {
         <AddUnitDialog floors={data.floors} selectedFloor={selectedFloor} onClose={() => setDialog(null)} onCreated={(floorId) => { setDialog(null); reload(floorId); }} />
       ) : null}
       {dialog === "edit" ? (
-        <InfoDialog title="Edit Property" onClose={() => setDialog(null)}>Property editing will open here.</InfoDialog>
-      ) : null}
-      {dialog === "report" ? (
-        <InfoDialog title="Property Report" onClose={() => setDialog(null)}>Property report preview will open here.</InfoDialog>
+        <EditPropertyDialog property={data.property} onClose={() => setDialog(null)} onSaved={() => { setDialog(null); reload(); }} />
       ) : null}
     </section>
   );
@@ -187,6 +184,29 @@ function AddUnitDialog({ floors, selectedFloor, onClose, onCreated }: { floors: 
         <label>Initial status<select name="status"><option>Vacant</option><option>Reserved</option><option>Under Maintenance</option><option>Inactive</option></select></label>
         {error ? <p className="form-error">{error}</p> : null}
         <button className="primary-btn">Add Unit</button>
+      </form>
+    </Dialog>
+  );
+}
+
+function EditPropertyDialog({ property, onClose, onSaved }: { property: any; onClose: () => void; onSaved: () => void }) {
+  const [error, setError] = useState("");
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    apiPatch(`/api/properties/${property.id}`, Object.fromEntries(new FormData(event.currentTarget)))
+      .then(onSaved)
+      .catch((reason) => setError(reason.message ?? "Unable to save property."));
+  }
+  return (
+    <Dialog title="Edit Property" onClose={onClose}>
+      <form className="form-grid" onSubmit={submit}>
+        <label>Name<input name="name" defaultValue={property.name} required /></label>
+        <label>Code<input name="code" defaultValue={property.code} required /></label>
+        <label className="wide">Address<input name="address" defaultValue={property.address} /></label>
+        <label>Contact number<input name="contactNumber" defaultValue={property.contactNumber} /></label>
+        <label>Manager<input name="manager" defaultValue={property.manager} /></label>
+        {error ? <p className="form-error">{error}</p> : null}
+        <button className="primary-btn">Save Property</button>
       </form>
     </Dialog>
   );

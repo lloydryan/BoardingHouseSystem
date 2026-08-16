@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api, money } from "../../lib/api";
-import { CreditCard, Droplets, FileText, Landmark, Users, Zap } from "lucide-react";
-import { DataTable, Page, StatCard, StatusBadge } from "../../components/ui";
+import { BedDouble, CircleDollarSign, CreditCard, DoorOpen, Droplets, FileText, Landmark, ReceiptText, Users, Zap } from "lucide-react";
+import { DataTable, Page, PageSkeleton, StatCard, StatusBadge } from "../../components/ui";
 
 export function PropertyDetails() {
   const { id } = useParams();
   const [item, setItem] = useState<any>();
   useEffect(() => { api<any>(`/api/properties/${id}`).then(setItem); }, [id]);
-  if (!item) return <Page title="Property Details">Loading property...</Page>;
+  if (!item) return <PageSkeleton title="Property Details" variant="detail" />;
   return (
     <Page title={item.name} eyebrow={item.address}>
       <div className="stat-grid">
-        <StatCard label="Total units" value={item.totalUnits} />
-        <StatCard label="Occupied" value={item.occupiedUnits} />
-        <StatCard label="Vacant" value={item.vacantUnits} />
-        <StatCard label="Expected rent" value={money(item.monthlyExpectedRent)} />
-        <StatCard label="Collected" value={money(item.collectedThisMonth)} />
-        <StatCard label="Outstanding" value={money(item.outstanding)} />
+        <StatCard label="Total units" value={item.totalUnits} icon={<DoorOpen size={19} />} />
+        <StatCard label="Occupied" value={item.occupiedUnits} icon={<BedDouble size={19} />} />
+        <StatCard label="Vacant" value={item.vacantUnits} icon={<Landmark size={19} />} />
+        <StatCard label="Expected rent" value={money(item.monthlyExpectedRent)} icon={<ReceiptText size={19} />} />
+        <StatCard label="Collected" value={money(item.collectedThisMonth)} icon={<CircleDollarSign size={19} />} />
+        <StatCard label="Outstanding" value={money(item.outstanding)} icon={<CreditCard size={19} />} />
       </div>
       <div className="property-workspace">
         {item.units.map((unit: any) => (

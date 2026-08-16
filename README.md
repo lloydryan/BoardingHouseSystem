@@ -34,16 +34,40 @@ cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
 ```
 
-Set either `FIREBASE_SERVICE_ACCOUNT_JSON` or `GOOGLE_APPLICATION_CREDENTIALS` in `apps/api/.env`, then seed Firestore:
+Set one Firebase Admin credential option in `apps/api/.env`, then seed Firestore:
+
+```env
+FIREBASE_SERVICE_ACCOUNT_PATH=C:\absolute\path\to\serviceAccountKey.json
+```
+
+You can also use `FIREBASE_SERVICE_ACCOUNT_JSON` or `GOOGLE_APPLICATION_CREDENTIALS`.
 
 ```bash
 npm run firebase:seed -w apps/api
+```
+
+Enable Firebase Authentication's Email/Password provider in Firebase Console, then seed matching Firebase Auth users:
+
+```bash
+npm run firebase:auth:seed -w apps/api
+```
+
+Confirm the records were written:
+
+```bash
+npm run firebase:verify -w apps/api
 ```
 
 To run the API from Firestore instead of memory:
 
 ```bash
 BH_DATA_SOURCE=firestore npm run dev:api
+```
+
+In PowerShell:
+
+```powershell
+$env:BH_DATA_SOURCE="firestore"; npm run dev:api
 ```
 
 Set `FIRESTORE_WRITE_THROUGH=true` to save demo mutations such as added properties, floors, units, landlord status changes, and theme updates back to Firestore.
@@ -53,6 +77,14 @@ Demo users are seeded with a `demoPassword` field for test accounts only:
 - Super Admin: `admin@boarding.test` / `admin123`
 - Landlord: `rivera@boarding.test` / `password123`
 - Landlord: `santos@boarding.test` / `password123`
+
+Login and RBAC are database-backed in Firestore mode:
+
+- The login page signs in with Firebase Authentication Email/Password.
+- API requests must send the Firebase ID token as a bearer token.
+- The API verifies the Firebase ID token, then resolves RBAC from the matching `users` Firestore record.
+- Super Admin routes require `SUPER_ADMIN`.
+- Landlord workspace routes require `LANDLORD` and are scoped by the logged-in user's `landlordId`.
 
 Do not use `demoPassword` for production accounts. Real Firebase Auth or hashed server-side passwords should replace it before launch.
 

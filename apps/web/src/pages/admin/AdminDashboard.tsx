@@ -1,21 +1,22 @@
 import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Building2, DoorOpen, ShieldCheck, UserCheck, UserX, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { DataTable, Page, StatCard, StatusBadge } from "../../components/ui";
+import { DataTable, Page, PageSkeleton, StatCard, StatusBadge } from "../../components/ui";
 
 export function AdminDashboard() {
   const [data, setData] = useState<any>();
   useEffect(() => { api<any>("/api/admin/dashboard").then(setData); }, []);
-  if (!data) return <Page title="Super Admin Dashboard">Loading platform health...</Page>;
+  if (!data) return <PageSkeleton title="Super Admin Dashboard" />;
   return (
     <Page title="Super Admin Dashboard" eyebrow="Centralized SaaS management">
       <div className="stat-grid">
-        <StatCard label="Total landlords" value={String(data.totals.totalLandlords)} />
-        <StatCard label="Active landlords" value={String(data.totals.activeLandlords)} />
-        <StatCard label="Suspended" value={String(data.totals.suspendedLandlords)} />
-        <StatCard label="Properties" value={String(data.totals.totalProperties)} />
-        <StatCard label="Units" value={String(data.totals.totalUnits)} />
-        <StatCard label="Tenants" value={String(data.totals.totalTenants)} />
+        <StatCard label="Total landlords" value={String(data.totals.totalLandlords)} icon={<ShieldCheck size={19} />} />
+        <StatCard label="Active landlords" value={String(data.totals.activeLandlords)} icon={<UserCheck size={19} />} />
+        <StatCard label="Suspended" value={String(data.totals.suspendedLandlords)} icon={<UserX size={19} />} />
+        <StatCard label="Properties" value={String(data.totals.totalProperties)} icon={<Building2 size={19} />} />
+        <StatCard label="Units" value={String(data.totals.totalUnits)} icon={<DoorOpen size={19} />} />
+        <StatCard label="Tenants" value={String(data.totals.totalTenants)} icon={<Users size={19} />} />
       </div>
       <div className="grid two">
         <article className="panel">

@@ -9,6 +9,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "firebase:seed": "tsx src/firebaseSeed.ts",
+    "firebase:auth:seed": "tsx src/firebaseAuthSeed.ts",
+    "firebase:verify": "tsx src/firebaseVerify.ts",
     "prisma:validate": "prisma validate --schema prisma/schema.prisma"
   },
   "dependencies": {

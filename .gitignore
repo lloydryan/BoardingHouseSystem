@@ -28,6 +28,11 @@ pnpm-debug.log*
 .env.*
 !.env.example
 
+# Firebase / Google Cloud private keys
+*service-account*.json
+firebase-adminsdk*.json
+google-application-credentials*.json
+
 # OS and editor files
 .DS_Store
 Thumbs.db

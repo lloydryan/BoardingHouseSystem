@@ -1,21 +1,36 @@
 import { Building2 } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiPost } from "../../lib/api";
+import { api } from "../../lib/api";
+import { clearSession, getStoredUser, homeForRole } from "../../lib/auth";
+import { firebaseAuth } from "../../lib/firebase";
 
 export function Login() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    const user = getStoredUser();
+    if (user && localStorage.getItem("bh_access_token")) navigate(homeForRole(user.role), { replace: true });
+  }, [navigate]);
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    clearSession();
     const form = new FormData(event.currentTarget);
-    apiPost<{ accessToken: string; user: any }>("/api/auth/login", Object.fromEntries(form))
-      .then(({ accessToken, user }) => {
+    const email = String(form.get("email") ?? "");
+    const password = String(form.get("password") ?? "");
+
+    signInWithEmailAndPassword(firebaseAuth, email, password)
+      .then(async ({ user: firebaseUser }) => {
+        const accessToken = await firebaseUser.getIdToken();
         localStorage.setItem("bh_access_token", accessToken);
+        const { user, landlord } = await api<{ user: any; landlord?: any }>("/api/auth/me");
         localStorage.setItem("bh_user", JSON.stringify(user));
-        navigate(user.role === "SUPER_ADMIN" ? "/admin/dashboard" : "/landlord/dashboard");
+        if (landlord) localStorage.setItem("bh_landlord", JSON.stringify(landlord));
+        navigate(homeForRole(user.role));
       })
       .catch(() => setError("Invalid email or password."));
   }
