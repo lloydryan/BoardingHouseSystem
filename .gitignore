@@ -1,12 +1,10 @@
 # Dependencies
 node_modules/
-apps/*/node_modules/
-packages/*/node_modules/
+**/node_modules/
 
 # Build output
 dist/
-apps/*/dist/
-packages/*/dist/
+**/dist/
 build/
 coverage/
 

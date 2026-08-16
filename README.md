@@ -1,8 +1,8 @@
-# Boarding House SaaS
+# Boarding House React
 
-Production-oriented SaaS Boarding House Monitoring and Rental Management System.
+React frontend for a boarding house monitoring and rental management system.
 
-This repository contains a runnable full-stack demo implementation plus the Phase 1 production architecture and Prisma schema.
+This project is currently frontend-only. Backend/API work can be added later, but the app is now organized as a simple Vite React project from the repository root.
 
 ## Run Locally
 
@@ -11,130 +11,39 @@ npm install
 npm run dev
 ```
 
-Open:
+Open `http://localhost:5173`.
 
-- Web app: `http://localhost:5173`
-- API health: `http://localhost:4000/api/health`
-
-Demo credentials shown on the login page:
-
-- Super Admin: `admin@boarding.test`
-- Landlord: `rivera@boarding.test`
-
-The current API uses seeded in-memory data so you can inspect workflows immediately. It can also hydrate the same demo collections from Firebase Firestore.
-
-## Firebase Setup
-
-Firebase client config is already added in `apps/web/.env.example` for project `boarding-housems`.
-
-Server-side Firestore reads and seeding need Firebase Admin credentials:
+## Scripts
 
 ```bash
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
+npm run dev
+npm run build
+npm run lint
+npm run typecheck
+npm run test
 ```
 
-Set one Firebase Admin credential option in `apps/api/.env`, then seed Firestore:
-
-```env
-FIREBASE_SERVICE_ACCOUNT_PATH=C:\absolute\path\to\serviceAccountKey.json
-```
-
-You can also use `FIREBASE_SERVICE_ACCOUNT_JSON` or `GOOGLE_APPLICATION_CREDENTIALS`.
-
-```bash
-npm run firebase:seed -w apps/api
-```
-
-Enable Firebase Authentication's Email/Password provider in Firebase Console, then seed matching Firebase Auth users:
-
-```bash
-npm run firebase:auth:seed -w apps/api
-```
-
-Confirm the records were written:
-
-```bash
-npm run firebase:verify -w apps/api
-```
-
-To run the API from Firestore instead of memory:
-
-```bash
-BH_DATA_SOURCE=firestore npm run dev:api
-```
-
-In PowerShell:
-
-```powershell
-$env:BH_DATA_SOURCE="firestore"; npm run dev:api
-```
-
-Set `FIRESTORE_WRITE_THROUGH=true` to save demo mutations such as added properties, floors, units, landlord status changes, and theme updates back to Firestore.
-
-Demo users are seeded with a `demoPassword` field for test accounts only:
-
-- Super Admin: `admin@boarding.test` / `admin123`
-- Landlord: `rivera@boarding.test` / `password123`
-- Landlord: `santos@boarding.test` / `password123`
-
-Login and RBAC are database-backed in Firestore mode:
-
-- The login page signs in with Firebase Authentication Email/Password.
-- API requests must send the Firebase ID token as a bearer token.
-- The API verifies the Firebase ID token, then resolves RBAC from the matching `users` Firestore record.
-- Super Admin routes require `SUPER_ADMIN`.
-- Landlord workspace routes require `LANDLORD` and are scoped by the logged-in user's `landlordId`.
-
-Do not use `demoPassword` for production accounts. Real Firebase Auth or hashed server-side passwords should replace it before launch.
-
-## Proposed Stack
-
-- Frontend: React, TypeScript, Vite, Tailwind CSS, Shadcn UI, Lucide Icons, React Router, React Hook Form, Zod, TanStack Query, Recharts
-- Backend: Node.js, TypeScript, Express.js, Prisma ORM, REST API
-- Database: PostgreSQL
-- Auth: JWT access tokens, refresh tokens in secure HTTP-only cookies, bcrypt password hashing
-
-## Workspace Layout
+## Folder Structure
 
 ```text
-apps/
-  api/      Express API, Prisma schema, backend modules
-  web/      React frontend
-docs/       Architecture, security, API, and deployment docs
-packages/   Shared contracts and utilities
+src/
+  assets/       Static frontend assets
+  components/   Reusable UI and feature components
+  config/       App configuration such as Firebase setup
+  contexts/     React context and auth route guards
+  hooks/        Shared React hooks
+  pages/        Page-level screens grouped by role
+  routes/       Route table and layout shell
+  schemas/      Validation schemas
+  services/     Client-side service helpers
 ```
 
-## Development Setup
+## Environment
 
-1. Install dependencies:
+Copy `.env.example` to `.env` and update values as needed.
 
 ```bash
-npm install
+cp .env.example .env
 ```
 
-2. Copy environment template:
-
-```bash
-cp apps/api/.env.example apps/api/.env
-```
-
-3. Update `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, and cookie settings.
-
-4. Validate the Prisma schema:
-
-```bash
-npm run prisma:validate
-```
-
-## Page Code
-
-Landlord pages are in `apps/web/src/pages/landlord`.
-
-Super Admin pages are in `apps/web/src/pages/admin`.
-
-Shared pages are in `apps/web/src/pages/shared`.
-
-Public pages are in `apps/web/src/pages/public`.
-
-The API entry and demo endpoints are in `apps/api/src/index.ts`.
+The frontend still has API service helpers in `src/services/apiService.ts` so the app is ready to connect to a backend later.
