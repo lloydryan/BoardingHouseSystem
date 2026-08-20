@@ -1,8 +1,9 @@
+import { FirebaseError } from "firebase/app";
 import { Building2 } from "lucide-react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../../services/apiService";
+import { api, ApiError } from "../../services/apiService";
 import { clearSession, getStoredUser, homeForRole } from "../../contexts/AuthContext";
 import { firebaseAuth } from "../../config/firebase";
 import { toast } from "../../services/toastService";
@@ -15,23 +16,33 @@ export function Login() {
     if (user && localStorage.getItem("bh_access_token")) navigate(homeForRole(user.role), { replace: true });
   }, [navigate]);
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     clearSession();
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") ?? "");
     const password = String(form.get("password") ?? "");
 
-    signInWithEmailAndPassword(firebaseAuth, email, password)
-      .then(async ({ user: firebaseUser }) => {
-        const accessToken = await firebaseUser.getIdToken();
-        localStorage.setItem("bh_access_token", accessToken);
-        const { user, landlord } = await api<{ user: any; landlord?: any }>("/api/auth/me");
-        localStorage.setItem("bh_user", JSON.stringify(user));
-        if (landlord) localStorage.setItem("bh_landlord", JSON.stringify(landlord));
-        navigate(homeForRole(user.role));
-      })
-      .catch(() => toast("Invalid email or password.", "error"));
+    try {
+      const { user: firebaseUser } = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      const accessToken = await firebaseUser.getIdToken();
+      localStorage.setItem("bh_access_token", accessToken);
+      const { user, landlord } = await api<{ user: any; landlord?: any }>("/api/auth/me");
+      localStorage.setItem("bh_user", JSON.stringify(user));
+      if (landlord) localStorage.setItem("bh_landlord", JSON.stringify(landlord));
+      navigate(homeForRole(user.role));
+    } catch (error) {
+      clearSession();
+      if (error instanceof FirebaseError && error.code.startsWith("auth/")) {
+        toast("Invalid email or password.", "error");
+        return;
+      }
+      if (error instanceof ApiError) {
+        toast(error.message, "error");
+        return;
+      }
+      toast("Sign-in succeeded, but your profile could not be loaded.", "error");
+    }
   }
 
   return (

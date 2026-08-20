@@ -33,16 +33,36 @@ async function handleResponse<T>(response: Response): Promise<T> {
     }
     throw new ApiError(response.status, await parseError(response));
   }
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    throw new ApiError(
+      response.status,
+      "API returned a non-JSON response. Check that VITE_API_BASE_URL points to the deployed backend."
+    );
+  }
   return response.json() as Promise<T>;
 }
 
+function apiUrl(path: string) {
+  if (
+    apiBaseUrl &&
+    window.location.hostname !== "localhost" &&
+    window.location.hostname !== "127.0.0.1" &&
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/i.test(apiBaseUrl)
+  ) {
+    throw new ApiError(0, "API is configured to use localhost. Set VITE_API_BASE_URL to your deployed backend URL.");
+  }
+
+  return `${apiBaseUrl}${path}`;
+}
+
 export async function api<T>(path: string): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, { headers: authHeaders() });
+  const response = await fetch(apiUrl(path), { headers: authHeaders() });
   return handleResponse<T>(response);
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, {
+  const response = await fetch(apiUrl(path), {
     method: "POST",
     headers: { "content-type": "application/json", ...authHeaders() },
     body: JSON.stringify(body)
@@ -51,7 +71,7 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
 }
 
 export async function apiPatch<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}${path}`, {
+  const response = await fetch(apiUrl(path), {
     method: "PATCH",
     headers: { "content-type": "application/json", ...authHeaders() },
     body: JSON.stringify(body)
