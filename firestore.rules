@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function role() {
+      return signedIn() ? userData().role : null;
+    }
+
+    function isAdmin() {
+      return role() in ["SUPER_ADMIN", "superAdmin", "admin"];
+    }
+
+    function landlordId() {
+      return userData().landlordId;
+    }
+
+    function ownsLandlord(id) {
+      return signedIn() && (request.auth.uid == id || landlordId() == id || isAdmin());
+    }
+
+    function ownsExistingLandlord() {
+      return signedIn() && (resource.data.landlordId == landlordId() || resource.data.landlordId == request.auth.uid || isAdmin());
+    }
+
+    function ownsRequestedLandlord() {
+      return signedIn() && (request.resource.data.landlordId == landlordId() || request.resource.data.landlordId == request.auth.uid || isAdmin());
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow delete: if false;
+    }
+
+    match /landlords/{id} {
+      allow read, create, update: if ownsLandlord(id);
+      allow delete: if isAdmin();
+    }
+
+    match /themes/{id} {
+      allow read, create, update: if ownsLandlord(id);
+      allow delete: if isAdmin();
+    }
+
+    match /settings/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /auditLogs/{id} {
+      allow read: if isAdmin();
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+
+    match /{collection}/{id} {
+      allow read: if collection in [
+        "properties", "floors", "units", "tenants", "billings",
+        "payments", "notifications", "electricityReadings", "waterReadings"
+      ] && ownsExistingLandlord();
+
+      allow create: if collection in [
+        "properties", "floors", "units", "tenants", "billings",
+        "payments", "notifications", "electricityReadings", "waterReadings"
+      ] && ownsRequestedLandlord();
+
+      allow update: if collection in [
+        "properties", "floors", "units", "tenants", "billings",
+        "payments", "notifications", "electricityReadings", "waterReadings"
+      ] && ownsExistingLandlord() && ownsRequestedLandlord();
+
+      allow delete: if collection in [
+        "properties", "floors", "units", "tenants", "billings",
+        "payments", "notifications", "electricityReadings", "waterReadings"
+      ] && ownsExistingLandlord();
+    }
+  }
+}

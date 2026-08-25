@@ -2,7 +2,7 @@
 
 React frontend for a boarding house monitoring and rental management system.
 
-This project is currently frontend-only. Backend/API work can be added later, but the app is now organized as a simple Vite React project from the repository root.
+This project is frontend-only and connects directly to Firebase Auth and Firestore from the Vite React app.
 
 ## Run Locally
 
@@ -46,4 +46,4 @@ Copy `.env.example` to `.env` and update values as needed.
 cp .env.example .env
 ```
 
-The frontend still has API service helpers in `src/services/apiService.ts` so the app is ready to connect to a backend later.
+Set the `VITE_FIREBASE_*` values for your Firebase project. The app does not need a separate API server.

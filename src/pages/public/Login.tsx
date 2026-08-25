@@ -5,7 +5,7 @@ import { FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError } from "../../services/apiService";
 import { clearSession, getStoredUser, homeForRole } from "../../contexts/AuthContext";
-import { firebaseAuth } from "../../config/firebase";
+import { requireAuth } from "../../config/firebase";
 import { toast } from "../../services/toastService";
 
 export function Login() {
@@ -24,7 +24,7 @@ export function Login() {
     const password = String(form.get("password") ?? "");
 
     try {
-      const { user: firebaseUser } = await signInWithEmailAndPassword(firebaseAuth, email, password);
+      const { user: firebaseUser } = await signInWithEmailAndPassword(requireAuth(), email, password);
       const accessToken = await firebaseUser.getIdToken();
       localStorage.setItem("bh_access_token", accessToken);
       const { user, landlord } = await api<{ user: any; landlord?: any }>("/api/auth/me");
