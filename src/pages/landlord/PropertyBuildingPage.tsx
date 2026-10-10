@@ -1,10 +1,10 @@
 import { ArrowLeft, FileBarChart, Home, Layers, Pencil, Plus, X } from "lucide-react";
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { ArchitecturalBuildingView } from "../../components/building/ArchitecturalBuildingView";
 import { BuildingLegend } from "../../components/building/BuildingLegend";
 import { BuildingTemplateSelector } from "../../components/building/BuildingTemplateSelector";
 import { BuildingFloor, BuildingUnit } from "../../components/building/types";
+import { PropertyScene } from "../../components/property-3d/PropertyScene";
 import { StatusBadge } from "../../components/ui";
 import { api, apiPatch, apiPost, money } from "../../services/apiService";
 
@@ -76,14 +76,13 @@ export function PropertyBuildingPage() {
 
       <main className="architectural-workspace">
         <section className="building-elevation-panel full-building-panel">
-          <ArchitecturalBuildingView
+          <PropertyScene
             property={data.property}
             floors={data.floors}
             selectedFloorId={selectedFloor?.id}
             selectedUnitId={selectedUnit?.id}
             onFloorSelect={selectFloor}
             onUnitSelect={setSelectedUnit}
-            buildingTemplate={buildingTemplate}
           />
           <footer className="building-only-footer">
             <BuildingLegend />

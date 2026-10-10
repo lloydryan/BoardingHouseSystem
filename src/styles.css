@@ -1671,6 +1671,161 @@ label {
 .architectural-canvas svg {
   filter: drop-shadow(0 26px 28px rgba(15, 23, 42, .12));
 }
+.property-3d-shell {
+  min-height: calc(100vh - 292px);
+  height: clamp(520px, calc(100vh - 292px), 820px);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.94), rgba(241,245,249,.9)),
+    radial-gradient(circle at 50% 0%, rgba(37, 99, 235, .08), transparent 28rem);
+}
+.property-3d-shell canvas {
+  min-width: 0;
+  min-height: 0;
+  touch-action: none;
+}
+.property-3d-toolbar {
+  position: absolute;
+  inset: 14px 14px auto 14px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+.property-3d-toolbar > div:first-child {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, .76);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(14px);
+}
+.property-3d-toolbar span,
+.property-3d-floor-rail span {
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.property-3d-toolbar strong {
+  color: var(--foreground);
+  font-size: 14px;
+}
+.property-3d-controls {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+.property-3d-controls button {
+  width: 38px;
+  min-height: 38px;
+  justify-content: center;
+  padding: 0;
+  background: rgba(255, 255, 255, .82);
+  backdrop-filter: blur(14px);
+}
+.property-3d-floor-rail {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 2;
+  display: flex;
+  max-width: calc(100% - 28px);
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.property-3d-floor-rail button {
+  min-width: 112px;
+  min-height: 52px;
+  display: grid;
+  justify-items: start;
+  align-content: center;
+  gap: 2px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, .82);
+  backdrop-filter: blur(14px);
+}
+.property-3d-floor-rail button.selected {
+  color: #fff;
+  border-color: var(--theme-primary, #2563eb);
+  background: linear-gradient(180deg, var(--theme-primary, #2563eb), var(--primary-strong, #1d4ed8));
+}
+.property-3d-floor-rail button.selected span {
+  color: rgba(255, 255, 255, .78);
+}
+.property-3d-label span,
+.property-3d-floor-label {
+  display: inline-grid;
+  gap: 2px;
+  min-width: max-content;
+  border: 1px solid rgba(15, 23, 42, .1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .86);
+  color: #172033;
+  padding: 5px 7px;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .12);
+  backdrop-filter: blur(10px);
+}
+.property-3d-floor-label span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+.property-3d-loader {
+  min-width: max-content;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, .88);
+  color: var(--foreground);
+  padding: 10px 12px;
+  box-shadow: var(--shadow-sm);
+}
+.property-3d-empty,
+.property-3d-fallback {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted-foreground);
+  text-align: center;
+}
+.property-3d-empty strong {
+  color: var(--foreground);
+  font-size: 18px;
+}
+.property-3d-fallback {
+  align-content: start;
+  justify-items: stretch;
+  padding: 18px;
+  overflow: auto;
+}
+.property-3d-fallback section {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, .78);
+}
+.property-3d-fallback section > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .floor-chip-row button.selected {
   box-shadow: 0 8px 18px color-mix(in srgb, var(--theme-primary) 14%, transparent);
 }
